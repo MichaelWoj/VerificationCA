@@ -94,8 +94,43 @@ public class Rate {
     public BigDecimal calculate(Period periodStay) {
         int normalRateHours = periodStay.occurences(normal);
         int reducedRateHours = periodStay.occurences(reduced);
-        return (this.hourlyNormalRate.multiply(BigDecimal.valueOf(normalRateHours))).add(
+        BigDecimal baseCost = (this.hourlyNormalRate.multiply(BigDecimal.valueOf(normalRateHours))).add(
                 this.hourlyReducedRate.multiply(BigDecimal.valueOf(reducedRateHours)));
+
+        if (kind == CarParkKind.VISITOR ){
+            if(baseCost.doubleValue() <= 8) {
+                return new BigDecimal(0);
+            }
+            else{
+                return baseCost.subtract(new BigDecimal(8).divide(new BigDecimal( 2)));
+            }
+        }
+
+        if (kind == CarParkKind.MANAGEMENT) {
+            if(baseCost.doubleValue() <= 3){
+                return new BigDecimal(3);
+            }
+            else{
+                return baseCost;
+            }
+        }
+
+        if (kind == CarParkKind.STUDENT) {
+            if(baseCost.doubleValue() <= 5.50){
+                return baseCost.setScale(2, BigDecimal.ROUND_DOWN);
+            }
+            return baseCost.subtract(BigDecimal.valueOf(5.5)).multiply(BigDecimal.valueOf(0.75)).add(BigDecimal.valueOf(5.5)).setScale(2, BigDecimal.ROUND_DOWN);
+        }
+
+        if (kind == CarParkKind.STAFF) {
+            if(baseCost.doubleValue() >= 16){
+                return new BigDecimal(16);
+            }
+            else{
+                return baseCost;
+            }
+        }
+        return baseCost;
     }
 
 }
